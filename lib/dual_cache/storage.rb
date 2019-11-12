@@ -18,30 +18,30 @@ module DualCache
       @level2 = FileStorage.new(options[:cache_path], options[:l2_size])
     end
 
-    def clear
+    def clear(options = nil)
       super
-      level2.clear
+      level2.clear(options)
     end
 
-    def read(key)
+    def read(key, options = nil)
       record = super
 
       if record.nil?
-        record = level2.read(key)
-        write(key, record)
+        record = level2.read(key, options)
+        write(key, record, {})
       end
 
       record
     end
 
-    def write(key, value)
-      level2.delete(key)
+    def write(key, value, options = nil)
+      level2.delete(key, options)
 
       super
     end
 
-    def delete(key)
-      super || level2.delete(key)
+    def delete(key, options = nil)
+      super || level2.delete(key, options)
     end
 
     # Copy prune implementation but allow delegation to second level
@@ -63,6 +63,8 @@ module DualCache
         @pruning = false
       end
     end
+
+    private
 
     def move(key)
       record = read(key)

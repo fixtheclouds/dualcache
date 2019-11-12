@@ -98,21 +98,8 @@ RSpec.describe DualCache::Storage do
     end
 
     it 'and moves second value to level 2' do
-      expect { subject }.not_to(change { storage.read('text') })
-    end
-  end
-
-  describe '#move' do
-    include_examples 'basic_write'
-
-    subject { storage.move('foo') }
-
-    it 'removes value from level 1' do
-      expect { subject }.to change { storage.send(:read_entry, 'foo', {}) }.to(nil)
-    end
-
-    it 'moves value to level 2' do
-      expect { subject }.to change { storage.level2.read('foo') }.to('bar')
+      expect { subject }.to(change { storage.level2.read('text') }
+        .to('obviously exceeding 16 bytes limit'))
     end
   end
 end
