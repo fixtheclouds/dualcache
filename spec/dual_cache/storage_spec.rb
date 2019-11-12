@@ -30,10 +30,16 @@ RSpec.describe DualCache::Storage do
 
       it { is_expected.to eq('bar') }
 
-      context 'when exceeding max size' do
+      context 'when exceeding max size for level 1' do
         let(:storage) { described_class.new(l1_size: 2.bytes) }
 
         it { is_expected.to eq('bar') }
+      end
+
+      context 'when exceeding both max sizes' do
+        let(:storage) { described_class.new(l1_size: 2.bytes, l2_size: 2.bytes) }
+
+        it { is_expected.to eq(nil) }
       end
     end
   end
@@ -47,7 +53,7 @@ RSpec.describe DualCache::Storage do
       expect { subject }.to change { storage.read('foo') }.from(nil).to('bar')
     end
 
-    context 'when exceeding max size' do
+    context 'when exceeding max size for level 1' do
       let(:storage) { described_class.new(l1_size: 2.bytes) }
 
       it "still writes 'foo' to 'bar'" do
@@ -56,6 +62,26 @@ RSpec.describe DualCache::Storage do
 
       it 'but not available at level 1' do
         expect { subject }.not_to(change { storage.send(:read_entry, 'foo', {}) })
+      end
+    end
+
+    context 'when exceeding both max sizes' do
+      let(:storage) { described_class.new(l1_size: 2.bytes, l2_size: 2.bytes) }
+
+      it 'does not write at all' do
+        expect { subject }.not_to(change { storage.read('foo') })
+      end
+    end
+
+    context 'when writing multiple objects to limited level2' do
+      let(:storage) { described_class.new(l1_size: 0.bytes, l2_size: 512.bytes) }
+
+      it 'holds only one value' do
+        subject
+        storage.write('text', 'obviously exceeding byte limit')
+
+        expect(storage.read('text')).to be_nil
+        expect(storage.read('foo')).not_to be_nil
       end
     end
   end
