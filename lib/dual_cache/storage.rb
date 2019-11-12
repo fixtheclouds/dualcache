@@ -18,6 +18,11 @@ module DualCache
       @level2 = FileStorage.new(options[:cache_path], options[:l2_size])
     end
 
+    def clear
+      super
+      level2.clear
+    end
+
     def read(key)
       record = super
 
