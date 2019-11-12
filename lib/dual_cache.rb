@@ -1,5 +1,2 @@
-require "dual_cache/version"
-
-module DualCache
-  # Your code goes here...
-end
+require 'dual_cache/storage'
+require 'dual_cache/version'
