@@ -1,5 +1,5 @@
 require "bundler/setup"
-require "dualcache"
+require "dual_cache"
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
