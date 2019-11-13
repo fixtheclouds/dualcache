@@ -61,7 +61,7 @@ RSpec.describe DualCache::Storage do
       end
 
       it 'but not available at level 1' do
-        expect { subject }.not_to(change { storage.send(:read_entry, 'foo', {}) })
+        expect { subject }.not_to(change { storage.level1.read('foo') })
       end
     end
 
@@ -89,31 +89,6 @@ RSpec.describe DualCache::Storage do
       it 'deletes value as well' do
         expect { subject }.to change { storage.read('foo') }.from('bar').to(nil)
       end
-    end
-  end
-
-  describe '#prune' do
-    subject { storage.prune(256.bytes) }
-
-    let(:params) { { l1_size: 1.kilobyte } }
-
-    before do
-      storage.clear
-      storage.write('a', 'b')
-      storage.write('text', 'obviously exceeding 16 bytes limit')
-    end
-
-    it 'leaves first value at level 1' do
-      expect { subject }.not_to(change { storage.send(:read_entry, 'a', {}).value })
-    end
-
-    it 'removes second value from level 1' do
-      expect { subject }.to change { storage.send(:read_entry, 'text', {}) }.to(nil)
-    end
-
-    it 'and moves second value to level 2' do
-      expect { subject }.to(change { storage.level2.read('text') }
-        .to('obviously exceeding 16 bytes limit'))
     end
   end
 end
