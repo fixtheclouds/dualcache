@@ -1,8 +1,9 @@
-# Second level
-
 require 'active_support/cache'
 
 module DualCache
+  # Level two cache
+  # Adds `prune` functionality similar to MemoryStore
+  # for removing files when cache size limit is exceeded
   class FileStorage < ActiveSupport::Cache::FileStore
     def initialize(cache_path, size)
       super(cache_path || 'tmp/cache')
@@ -16,8 +17,8 @@ module DualCache
       @cache_size = 0
     end
 
-    # Copies behaviour of ActiveSupport::Cache::MemoryStore#prune
-    def prune(target_size, max_time = nil)
+    # Mimics behaviour of ActiveSupport::Cache::MemoryStore#prune
+    def prune(target_size)
       return if pruning?
 
       @pruning = true

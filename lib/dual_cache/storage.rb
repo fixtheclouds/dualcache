@@ -1,9 +1,9 @@
-# First level
-
 require 'active_support/cache'
 require 'dual_cache/file_storage'
 
 module DualCache
+  # Main storage class
+  # Implements level one (in-memory) cache
   class Storage < ActiveSupport::Cache::MemoryStore
     attr_reader :level2
 
