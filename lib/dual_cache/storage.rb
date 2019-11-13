@@ -4,17 +4,20 @@ require 'dual_cache/memory_storage'
 module DualCache
   # Main storage class
   class Storage
+    STRATEGIES = %w(least_used most_used).freeze
+
     attr_reader :level1, :level2
 
     # Initialization
     #
     # Options keys:
-    # path (string) cache_path for FileStorage
+    # strategy (string) caching strategy ('most_used'|'least_used')
     # l1_size (integer) max cache size for MemoryStorage
     # l2_size (integer) max cache size for FileStorage
     def initialize(options = {})
-      @level1 = MemoryStorage.new(options[:l1_size])
-      @level2 = FileStorage.new(options[:cache_path], options[:l2_size])
+      strategy = STRATEGIES.include?(options[:strategy]) ? options[:strategy] : 'least_used'
+      @level1 = MemoryStorage.new(options[:l1_size], strategy)
+      @level2 = FileStorage.new(options[:l2_size], strategy)
     end
 
     def clear(options = nil)

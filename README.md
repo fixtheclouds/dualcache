@@ -21,7 +21,7 @@ cache.clear # => true
 
 ### Initialization params hash keys
 
-- `cache_path`: relative path to file storage files
+- `strategy`: caching strategy
 - `l1_size`: maximum cache size in bytes for l1
 - `l2_size`: maximum cache size in bytes for l2
 

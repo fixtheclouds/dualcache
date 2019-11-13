@@ -1,6 +1,7 @@
 RSpec.describe DualCache::MemoryStorage do
-  let(:storage) { described_class.new(size) }
+  let(:storage) { described_class.new(size, strategy) }
   let(:size) { nil }
+  let(:strategy) { nil }
 
   describe '#needs_prune?' do
     subject { storage.needs_prune? }
@@ -33,10 +34,23 @@ RSpec.describe DualCache::MemoryStorage do
       storage.write('qux', 101)
       storage.write('bar', 102)
       storage.write('foo', 103)
+      storage.read('bar')
     end
 
-    it 'lists keys from oldest to newest' do
-      is_expected.to eq(%w(baz qux bar foo))
+    context 'given `least used` strategy' do
+      let(:strategy) { 'least_used' }
+
+      it 'lists keys ordered by least recently used' do
+        is_expected.to eq(%w(baz qux foo bar))
+      end
+    end
+
+    context 'given `most used` strategy' do
+      let(:strategy) { 'most_used' }
+
+      it 'lists keys ordered by most recently used' do
+        is_expected.to eq(%w(bar foo qux baz))
+      end
     end
   end
 end

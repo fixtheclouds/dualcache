@@ -3,8 +3,9 @@ require 'active_support/cache'
 module DualCache
   # Level one cache
   class MemoryStorage < ActiveSupport::Cache::MemoryStore
-    def initialize(size)
+    def initialize(size, strategy = 'least_used')
       super(size: size)
+      @strategy = strategy
     end
 
     # Remove #prune call from implementation
@@ -30,7 +31,19 @@ module DualCache
     end
 
     def keys
-      synchronize { @key_access.keys.sort { |a, b| @key_access[a].to_f <=> @key_access[b].to_f } }
+      synchronize do
+        @key_access.keys.sort do |a, b|
+          if strategy == 'least_used'
+            @key_access[a].to_f <=> @key_access[b].to_f
+          else
+            @key_access[b].to_f <=> @key_access[a].to_f
+          end
+        end
+      end
+    end
+
+    def strategy
+      synchronize { @strategy }
     end
   end
 end
