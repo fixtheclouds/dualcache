@@ -1,22 +1,23 @@
 require 'active_support/cache'
-require 'monitor'
 
 module DualCache
   # Level two cache
   # Adds `prune` functionality similar to MemoryStore
   # for removing files when cache size limit is exceeded
   class FileStorage < ActiveSupport::Cache::FileStore
+    attr_reader :strategy
+
     def initialize(size, strategy = 'least_used')
       super('tmp/cache')
       @max_size = size || 32.megabytes
       @pruning = false
       @strategy = strategy
-      @monitor = Monitor.new
+      @mutex = Mutex.new
       @key_access = {}
     end
 
     def clear(options = nil)
-      @key_access.clear
+      synchronize { @key_access.clear }
       super
     end
 
@@ -51,7 +52,7 @@ module DualCache
     end
 
     def synchronize(&block)
-      @monitor.synchronize(&block)
+      @mutex.synchronize(&block)
     end
 
     private
@@ -108,10 +109,6 @@ module DualCache
           false
         end
       end
-    end
-
-    def strategy
-      synchronize { @strategy }
     end
   end
 end

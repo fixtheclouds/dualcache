@@ -18,32 +18,45 @@ module DualCache
       strategy = STRATEGIES.include?(options[:strategy]) ? options[:strategy] : 'least_used'
       @level1 = MemoryStorage.new(options[:l1_size], strategy)
       @level2 = FileStorage.new(options[:l2_size], strategy)
+      @mutex = Mutex.new
     end
 
     def clear(options = nil)
-      level1.clear(options)
-      level2.clear(options)
+      synchronize do
+        level1.clear(options)
+        level2.clear(options)
+      end
     end
 
     def read(key, options = nil)
-      record = level1.read(key, options)
-      if record.nil?
-        record = level2.read(key, options)
-        level1.write(key, record, {})
-      end
+      synchronize do
+        record = level1.read(key, options)
+        if record.nil?
+          record = level2.read(key, options)
+          level1.write(key, record, {})
+        end
 
-      record
+        record
+      end
     end
 
     def write(key, value, options = nil)
-      level2.delete(key, options)
-      level1.write(key, value, options)
-      prune_entries if level1.needs_prune?
+      synchronize do
+        level2.delete(key, options)
+        level1.write(key, value, options)
+        prune_entries if level1.needs_prune?
+      end
     end
 
     def delete(key, options = nil)
-      level1.delete(key, options)
-      level2.delete(key, options)
+      synchronize do
+        level1.delete(key, options)
+        level2.delete(key, options)
+      end
+    end
+
+    def synchronize(&block)
+      @mutex.synchronize(&block)
     end
 
     private

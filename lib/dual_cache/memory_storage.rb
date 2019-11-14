@@ -3,6 +3,8 @@ require 'active_support/cache'
 module DualCache
   # Level one cache
   class MemoryStorage < ActiveSupport::Cache::MemoryStore
+    attr_reader :strategy
+
     def initialize(size, strategy = 'least_used')
       super(size: size)
       @strategy = strategy
@@ -40,10 +42,6 @@ module DualCache
           end
         end
       end
-    end
-
-    def strategy
-      synchronize { @strategy }
     end
   end
 end
