@@ -30,3 +30,9 @@ cache.clear # => true
 ```
 $ bundle exec rspec
 ```
+
+## TODO
+
+- Write more verbose manual
+- Implement various cache storages (e.d. redis, memcached)
+- Connect CI, add coverage
