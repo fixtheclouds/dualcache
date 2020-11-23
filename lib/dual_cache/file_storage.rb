@@ -16,7 +16,7 @@ module DualCache
       @key_access = {}
     end
 
-    def clear(options = nil)
+    def clear(options = {})
       synchronize { @key_access.clear }
       super
     end

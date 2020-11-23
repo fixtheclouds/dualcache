@@ -21,7 +21,7 @@ module DualCache
       @mutex = Mutex.new
     end
 
-    def clear(options = nil)
+    def clear(options = {})
       synchronize do
         level1.clear(options)
         level2.clear(options)
