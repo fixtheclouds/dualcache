@@ -5,6 +5,9 @@ module DualCache
   # Main storage class
   class Storage
     STRATEGIES = %w(least_used most_used).freeze
+    STORAGES = {
+      file: FileStorage
+    }
 
     attr_reader :level1, :level2
 
@@ -12,12 +15,16 @@ module DualCache
     #
     # Options keys:
     # strategy (string) caching strategy ('most_used'|'least_used')
+    # l2_type (string) storage type
     # l1_size (integer) max cache size for MemoryStorage
     # l2_size (integer) max cache size for FileStorage
     def initialize(options = {})
       strategy = STRATEGIES.include?(options[:strategy]) ? options[:strategy] : 'least_used'
       @level1 = MemoryStorage.new(options[:l1_size], strategy)
-      @level2 = FileStorage.new(options[:l2_size], strategy)
+      level2_storage_class = options[:l2_type]&.to_sym || :file
+      raise StandardError, 'Invalid storage type' unless STORAGES.include?(level2_storage_class)
+
+      @level2 = STORAGES[level2_storage_class].new(options[:l2_size], strategy)
       @mutex = Mutex.new
     end
 

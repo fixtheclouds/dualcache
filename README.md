@@ -42,4 +42,4 @@ $ bundle exec rspec
 
 - Implement more caching strategies
 - Implement various cache storages (e.d. redis, memcached)
-- Connect CI, add coverage
+- Add coverage
