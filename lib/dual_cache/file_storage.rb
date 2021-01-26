@@ -1,19 +1,15 @@
 require 'active_support/cache'
+require 'dual_cache/mixins/level_two'
 
 module DualCache
-  # Level two cache
-  # Adds `prune` functionality similar to MemoryStore
-  # for removing files when cache size limit is exceeded
   class FileStorage < ActiveSupport::Cache::FileStore
+    include DualCache::Mixins::LevelTwo
+
     attr_reader :strategy
 
     def initialize(size, strategy = 'least_used')
       super('tmp/cache')
-      @max_size = size || 32.megabytes
-      @pruning = false
-      @strategy = strategy
-      @mutex = Mutex.new
-      @key_access = {}
+      init_instance_variables(size, strategy)
     end
 
     def clear(options = {})

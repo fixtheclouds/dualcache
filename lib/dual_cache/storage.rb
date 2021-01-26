@@ -1,12 +1,14 @@
 require 'dual_cache/file_storage'
 require 'dual_cache/memory_storage'
+require 'dual_cache/redis_storage'
 
 module DualCache
   # Main storage class
   class Storage
     STRATEGIES = %w(least_used most_used).freeze
     STORAGES = {
-      file: FileStorage
+      file: FileStorage,
+      redis: RedisStorage
     }
 
     attr_reader :level1, :level2
